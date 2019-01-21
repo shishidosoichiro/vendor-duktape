@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+# Exit, if return non-zero or use an undefined variable.
+set -eu
+
+cd "$(dirname "$0")/.."
+## cd workdir
+#scriptfile="$(realpath "$0")"
+#bin="$(dirname "$scriptfile")"
+#workdir="$(dirname "$bin")"
+
+# Variables
+VERSION=${1:-2.3.0}
+
+echo "$PWD/versions/$VERSION"

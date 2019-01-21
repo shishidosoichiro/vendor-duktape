@@ -1,0 +1,84 @@
+#!/usr/bin/env sh
+
+# Exit, if return non-zero or use an undefined variable.
+set -eu
+
+cd "$(dirname "$0")/.."
+
+# Variables
+VERSION=${1:-2.3.0}
+
+# OS
+if uname -s | grep -q MINGW64; then
+	os=win
+else
+	os=linux
+fi
+
+if [ $os = win ]; then
+	ARCHITECTURE=x64
+	ARCHIVE_BASE=nim-$VERSION
+	ARCHIVE_FILE=${ARCHIVE_BASE}_${ARCHITECTURE}.zip
+	DOWNLOAD_URL=https://nim-lang.org/download/$ARCHIVE_FILE
+else
+	ARCHIVE_BASE=duktape-$VERSION
+	ARCHIVE_FILE=${ARCHIVE_BASE}.tar.xz
+	DOWNLOAD_URL=https://github.com/svaarala/duktape/releases/download/v$VERSION/$ARCHIVE_FILE
+fi
+
+# Clean
+clean() {
+	rm -rf temp
+}
+
+# Download
+download() {
+	mkdir -p temp
+	cd temp
+	rm -rf $ARCHIVE_FILE
+	if which wget 2> /dev/null; then
+		wget $DOWNLOAD_URL
+	else
+		curl --progress-bar --show-error --location --remote-header-name --remote-name $DOWNLOAD_URL
+	fi
+	cd ..
+}
+
+# Extract
+extract() {
+	mkdir -p temp
+	cd temp
+	rm -rf $ARCHIVE_BASE
+	ext="$(echo "$ARCHIVE_FILE" | sed 's/^.*\.\([^\.]*\)$/\1/')"
+	if [ "$ext" = "zip" ]; then
+		unzip $ARCHIVE_FILE
+	else
+		tar -Jxvf $ARCHIVE_FILE
+	fi
+	cd ..
+}
+
+# Move
+move() {
+	rm -rf versions/$VERSION
+	mkdir -p versions/$VERSION
+	mv temp/$ARCHIVE_BASE/* versions/$VERSION
+}
+
+# Install
+install() {
+	cd versions/$VERSION
+	if [ $os = win ]; then
+		echo yes
+	else
+		make -f Makefile.cmdline
+	fi
+	cd ../..
+}
+
+# Start
+clean
+download $DOWNLOAD_URL
+extract $ARCHIVE_FILE
+move $VERSION
+install $os $VERSION
