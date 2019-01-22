@@ -4,10 +4,6 @@
 set -eu
 
 cd "$(dirname "$0")/.."
-## cd workdir
-#scriptfile="$(realpath "$0")"
-#bin="$(dirname "$scriptfile")"
-#workdir="$(dirname "$bin")"
 
 # Variables
 VERSION=${1:-2.3.0}
