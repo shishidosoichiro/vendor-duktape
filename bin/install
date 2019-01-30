@@ -8,18 +8,12 @@ cd "$(dirname "$0")/.."
 # Variables
 VERSION=${1:-2.3.0}
 
-# OS
-if uname -s | grep -q MINGW64; then
-	os=win
-else
-	os=linux
-fi
+os=$(./bin/os)
+distro=$(./bin/distro)
 
 if [ $os = win ]; then
-	ARCHITECTURE=x64
-	ARCHIVE_BASE=nim-$VERSION
-	ARCHIVE_FILE=${ARCHIVE_BASE}_${ARCHITECTURE}.zip
-	DOWNLOAD_URL=https://nim-lang.org/download/$ARCHIVE_FILE
+	echo "Windows is not supported." >&2
+	exit 1
 else
 	ARCHIVE_BASE=duktape-$VERSION
 	ARCHIVE_FILE=${ARCHIVE_BASE}.tar.xz
@@ -68,11 +62,7 @@ move() {
 # Install
 install() {
 	cd versions/$VERSION
-	if [ $os = win ]; then
-		echo yes
-	else
-		make -f Makefile.cmdline
-	fi
+	make -f Makefile.cmdline
 	cd ../..
 }
 
